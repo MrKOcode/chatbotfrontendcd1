@@ -75,6 +75,12 @@ export const fetchConversationList = () => {
         "fetchConversationList - Sending request to ${API_BASE}/api/AIchat/conversations",
       );
       const userId = localStorage.getItem("userId");
+      if (!userId) {
+  console.warn("User not logged in yet. Skipping API call.");
+  dispatch(fetchConListFailed()); // or a dedicated "not logged in" action
+  return;
+}
+
       const response = await fetch(`${API_BASE}/api/AIchat/conversations?userId=${userId}`, {
         method: "GET",
         headers: getAuthHeaders(),

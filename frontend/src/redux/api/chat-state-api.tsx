@@ -132,6 +132,10 @@ export const fetchConversationContent = (conversationId: string) => {
 
     try {
       const userId = localStorage.getItem("userId");
+      if (!userId) {
+  dispatch(fetchConContentFailed());
+  return;
+}
       console.log(
         `fetchConversationContent - Sending request to /api/AIchat/conversations/${conversationId}/messages?userId=${userId}`,
       );
@@ -198,18 +202,22 @@ export const createConversation = () => {
     dispatch(createConReq());
     console.log("createConversation - Dispatched createConReq");
     try {
-      const requestBody = {
-        userId: localStorage.getItem("userId"),
-      };
-      console.log("createConversation - Request body:", requestBody);
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    dispatch(createConFailed());
+    throw new Error("Not logged in: missing userId");
+  }
 
-      console.log("createConversation - Sending request to /api/AIchat/conversations");
+  const requestBody = { userId };
 
-      const response = await fetch(`${API_BASE}/api/AIchat/conversations`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(requestBody),
-      });
+  console.log("createConversation - Request body:", requestBody);
+  console.log("createConversation - Sending request to /api/AIchat/conversations");
+
+  const response = await fetch(`${API_BASE}/api/AIchat/conversations`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(requestBody),
+  });
       console.log("createConversation - Received response:", response);
 
       if (!response.ok) {
@@ -285,11 +293,18 @@ export const sendMessage = (conversationId: string, content: string) => {
 };
       console.log("sendMessage - Created backend message:", message);
 
-      const requestBody = {
-        userId: localStorage.getItem("userId"),
-        conversationId,
-        message, // Use the correct field name expected by the API
-      };
+      const userId = localStorage.getItem("userId");
+if (!userId) {
+  console.warn("sendMessage - Not logged in: missing userId");
+  dispatch(sendMsgFailed());
+  throw new Error("Not logged in: missing userId");
+}
+
+const requestBody = {
+  userId,
+  conversationId,
+  message,
+};
       console.log("sendMessage - Request body:", requestBody);
 
       console.log(
@@ -351,10 +366,17 @@ export const deleteConversation = (conversationId: string) => {
     dispatch(deleteConReq());
     console.log("deleteConversation - Dispatched deleteConReq");
     try {
-      const requestBody = {
-        userId: localStorage.getItem("userId"),
-        conversationId,
-      };
+      const userId = localStorage.getItem("userId");
+if (!userId) {
+  console.warn("deleteConversation - Not logged in: missing userId");
+  dispatch(deleteConFailed());
+  throw new Error("Not logged in: missing userId");
+}
+
+const requestBody = {
+  userId,
+  conversationId,
+};
       console.log("deleteConversation - Request body:", requestBody);
 
       console.log(

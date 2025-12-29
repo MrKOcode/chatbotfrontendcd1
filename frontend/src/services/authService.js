@@ -14,6 +14,17 @@ const pool = new CognitoUserPool({
   ClientId: CLIENT_ID,
 });
 
+// --- helper: groups could be missing ---
+const extractGroups = (decoded) => {
+  const g = decoded["cognito:groups"];
+  if (!g) return [];
+  // jwtDecode usually gives an array already, but keep it defensive
+  return Array.isArray(g) ? g : [];
+};
+
+const roleFromGroups = (groups) => (groups.includes("admins") ? "admin" : "student");
+
+
 // ---------- helpers ----------
 const saveSession = (session) => {
   const idToken = session.getIdToken().getJwtToken();
@@ -21,12 +32,19 @@ const saveSession = (session) => {
   const refreshToken = session.getRefreshToken()?.getToken();
   const decoded = jwtDecode(idToken);
 
+  const groups = extractGroups(decoded);
+  const role = roleFromGroups(groups);
+
   localStorage.setItem("idToken", idToken);
   localStorage.setItem("accessToken", accessToken);
   localStorage.setItem("refreshToken", refreshToken || "");
   localStorage.setItem("username", decoded["cognito:username"]);
   localStorage.setItem("userId", decoded.sub);
   localStorage.setItem("email", decoded.email);
+
+  //New added:
+  localStorage.setItem("groups", JSON.stringify(groups));
+  localStorage.setItem("role", role);
 };
 
 // ---------- register ----------
@@ -66,10 +84,24 @@ export const loginUser = async (username, password) =>
 export const checkAuthStatus = () => {
   const idToken = localStorage.getItem("idToken");
   if (!idToken) return { isAuthenticated: false, user: null };
+
   const decoded = jwtDecode(idToken);
+  const groups = extractGroups(decoded);
+  const role = roleFromGroups(groups);
+
+  // keep localStorage consistent in case tokens changed
+  localStorage.setItem("groups", JSON.stringify(groups));
+  localStorage.setItem("role", role);
+
   return {
     isAuthenticated: true,
-    user: { userId: decoded.sub, username: decoded["cognito:username"], email: decoded.email },
+    user: {
+      userId: decoded.sub,
+      username: decoded["cognito:username"],
+      email: decoded.email,
+      groups,
+      role,
+    },
   };
 };
 
@@ -77,3 +109,6 @@ export const checkAuthStatus = () => {
 export const logoutUser = () => {
   localStorage.clear();
 };
+
+// OPTIONAL convenience:
+export const isAdmin = () => localStorage.getItem("role") === "admin";

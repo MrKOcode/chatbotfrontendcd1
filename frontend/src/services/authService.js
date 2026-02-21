@@ -3,112 +3,151 @@ import {
   CognitoUser,
   AuthenticationDetails,
 } from "amazon-cognito-identity-js";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
-const REGION = import.meta.env.VITE_COGNITO_REGION;
-const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID;
-const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID;
-
-const pool = new CognitoUserPool({
-  UserPoolId: USER_POOL_ID,
-  ClientId: CLIENT_ID,
-});
-
-// --- helper: groups could be missing ---
-const extractGroups = (decoded) => {
-  const g = decoded["cognito:groups"];
-  if (!g) return [];
-  // jwtDecode usually gives an array already, but keep it defensive
-  return Array.isArray(g) ? g : [];
+const poolData = {
+  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
 };
 
-const roleFromGroups = (groups) => (groups.includes("admins") ? "admin" : "student");
+const userPool = new CognitoUserPool(poolData);
 
+// ========================
+// Token Helpers
+// ========================
 
-// ---------- helpers ----------
-const saveSession = (session) => {
+const saveTokens = (session) => {
   const idToken = session.getIdToken().getJwtToken();
   const accessToken = session.getAccessToken().getJwtToken();
-  const refreshToken = session.getRefreshToken()?.getToken();
-  const decoded = jwtDecode(idToken);
-
-  const groups = extractGroups(decoded);
-  const role = roleFromGroups(groups);
+  const refreshToken = session.getRefreshToken().getToken();
 
   localStorage.setItem("idToken", idToken);
   localStorage.setItem("accessToken", accessToken);
-  localStorage.setItem("refreshToken", refreshToken || "");
-  localStorage.setItem("username", decoded["cognito:username"]);
-  localStorage.setItem("userId", decoded.sub);
-  localStorage.setItem("email", decoded.email);
+  localStorage.setItem("refreshToken", refreshToken);
 
-  //New added:
-  localStorage.setItem("groups", JSON.stringify(groups));
-  localStorage.setItem("role", role);
+  const decoded = jwtDecode(idToken);
+  localStorage.setItem(
+    "username",
+    decoded.email || decoded["cognito:username"] || ""
+  );
 };
 
-// ---------- register ----------
-export const registerUser = async (username, password) =>
-  new Promise((resolve, reject) => {
-    pool.signUp(username, password, [], null, (err, result) => {
-      if (err) return reject({ success: false, error: err.message });
+const clearTokens = () => {
+  localStorage.removeItem("idToken");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("username");
+};
+
+// ========================
+// Register
+// ========================
+
+export const registerUser = (email, password) => {
+  return new Promise((resolve) => {
+    userPool.signUp(email, password, [], null, (err, result) => {
+      if (err) {
+        resolve({ success: false, error: err.message });
+        return;
+      }
+
       resolve({
         success: true,
         data: {
-          userId: result.userSub,
-          username,
+          username: result.user.getUsername(),
+          userConfirmed: result.userConfirmed,
         },
       });
     });
   });
+};
 
-// ---------- login ----------
-export const loginUser = async (username, password) =>
-  new Promise((resolve, reject) => {
-    const auth = new AuthenticationDetails({ Username: username, Password: password });
-    const user = new CognitoUser({ Username: username, Pool: pool });
+// ========================
+// Confirm Registration
+// ========================
 
-    user.authenticateUser(auth, {
-      onSuccess: (session) => {
-        saveSession(session);
-        resolve({
-          success: true,
-          data: { username },
-        });
-      },
-      onFailure: (err) => reject({ success: false, error: err.message }),
+export const confirmRegistration = (email, code) => {
+  return new Promise((resolve) => {
+    const user = new CognitoUser({
+      Username: email,
+      Pool: userPool,
+    });
+
+    user.confirmRegistration(code, true, (err, result) => {
+      if (err) {
+        resolve({ success: false, error: err.message });
+        return;
+      }
+
+      resolve({ success: true });
     });
   });
+};
 
-// ---------- check ----------
+// ========================
+// Login
+// ========================
+
+export const loginUser = (email, password) => {
+  return new Promise((resolve) => {
+    const authDetails = new AuthenticationDetails({
+      Username: email,
+      Password: password,
+    });
+
+    const user = new CognitoUser({
+      Username: email,
+      Pool: userPool,
+    });
+
+    user.authenticateUser(authDetails, {
+      onSuccess: (session) => {
+        saveTokens(session);
+        resolve({ success: true });
+      },
+      onFailure: (err) => {
+        resolve({ success: false, error: err.message });
+      },
+    });
+  });
+};
+
+// ========================
+// Auth Status
+// ========================
+
 export const checkAuthStatus = () => {
   const idToken = localStorage.getItem("idToken");
-  if (!idToken) return { isAuthenticated: false, user: null };
+  if (!idToken) return { isAuthenticated: false };
 
-  const decoded = jwtDecode(idToken);
-  const groups = extractGroups(decoded);
-  const role = roleFromGroups(groups);
+  try {
+    const decoded = jwtDecode(idToken);
+    if (Date.now() > decoded.exp * 1000) {
+      clearTokens();
+      return { isAuthenticated: false };
+    }
 
-  // keep localStorage consistent in case tokens changed
-  localStorage.setItem("groups", JSON.stringify(groups));
-  localStorage.setItem("role", role);
-
-  return {
-    isAuthenticated: true,
-    user: {
-      userId: decoded.sub,
-      username: decoded["cognito:username"],
-      email: decoded.email,
-      groups,
-      role,
-    },
-  };
+    return {
+      isAuthenticated: true,
+      user: {
+        username:
+          decoded.email ||
+          decoded["cognito:username"] ||
+          localStorage.getItem("username"),
+      },
+    };
+  } catch {
+    clearTokens();
+    return { isAuthenticated: false };
+  }
 };
 
-// ---------- logout ----------
+// ========================
+// Logout
+// ========================
+
 export const logoutUser = () => {
-  localStorage.clear();
+  const currentUser = userPool.getCurrentUser();
+  if (currentUser) currentUser.signOut();
+  clearTokens();
 };
-
-// OPTIONAL convenience:
-export const isAdmin = () => localStorage.getItem("role") === "admin";

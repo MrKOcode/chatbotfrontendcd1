@@ -6,40 +6,52 @@ import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 
-// https://vite.dev/config/
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-return{
+  return {
+    plugins: [react(), tailwindcss()],
 
-  plugins: [react(), tailwindcss()],
-  test: {
-    globals: true, // Enable global access to Vitest APIs like `describe`, `test`, `expect`
-    environment: "jsdom", //  Simulate browser environment for testing DOM-related code
-    setupFiles: ["./test/setup/testSetup.tsx"], // Path to setup file for test environment configurations
-    include: ["./test/**/*.{test,spec}.{ts,tsx}"], // Path to test files
-    coverage: {
-      reporter: ["text", "json", "html"], // Report coverage in text, json, and html formats
-      exclude: ["node_modules/", "test/"], // Exclude files from coverage report
+    define: {
+      global: "globalThis",
+      "process.env": {},
     },
-  },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-      "@test": path.resolve(__dirname, "test"),
-      "@src": path.resolve(__dirname, "src"),
+
+    optimizeDeps: {
+      include: ["buffer", "process"],
     },
-    extensions: [".js", ".jsx", ".ts", ".tsx"],
-  },
-  server: {
-    proxy: {
-      "/api": {
-        target: env.VITE_API_BASE_URL,
-        changeOrigin: true,
-        secure: false,
+
+    test: {
+      globals: true,
+      environment: "jsdom",
+      setupFiles: ["./test/setup/testSetup.tsx"],
+      include: ["./test/**/*.{test,spec}.{ts,tsx}"],
+      coverage: {
+        reporter: ["text", "json", "html"],
+        exclude: ["node_modules/", "test/"],
       },
     },
-  },
-}
-});
 
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
+        "@test": path.resolve(__dirname, "test"),
+        "@src": path.resolve(__dirname, "src"),
+
+        buffer: "buffer",
+        process: "process",
+      },
+      extensions: [".js", ".jsx", ".ts", ".tsx"],
+    },
+
+    server: {
+      proxy: {
+        "/api": {
+          target: env.VITE_API_BASE_URL,
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
+  };
+});

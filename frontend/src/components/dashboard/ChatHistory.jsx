@@ -27,7 +27,7 @@ const ChatHistory = () => {
     setUserRole(role);
     setCurrentUserId(userId);
 
-    if (role === "admin") {
+    if (role === "admins") {
       fetchAllUsers();
       fetchAdminChatSummary(userId);
     } else {
@@ -190,7 +190,7 @@ const ChatHistory = () => {
       </div>
 
       <div className={styles.content}>
-        {userRole === "admin" && (
+        {userRole === "admins" && (
           <div className={styles.userList}>
             <h3>👥 User List</h3>
             {loading && !selectedUserId ? (
@@ -305,7 +305,7 @@ const ChatHistory = () => {
             </>
           )}
 
-          {!selectedUserId && userRole === "admin" && (
+          {!selectedUserId && userRole === "admins" && (
             <div className={styles.selectPrompt}>
               👈 Select a user to view chat history
             </div>

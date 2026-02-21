@@ -24,27 +24,22 @@ const saveTokens = (session) => {
   localStorage.setItem("idToken", idToken);
   localStorage.setItem("accessToken", accessToken);
   localStorage.setItem("refreshToken", refreshToken);
-  localStorage.setItem("userRole", role);
 
   const decoded = jwtDecode(idToken);
-  localStorage.setItem(
-    "username",
-    decoded.email || decoded["cognito:username"] || ""
-  );
 
+  // username + userId
+  const username = decoded.email || decoded["cognito:username"] || "";
+  localStorage.setItem("username", username);
   localStorage.setItem("userId", decoded.sub || "");
 
-  const emailOrUsername =
-    decoded.email || decoded["cognito:username"] || "";
-
-
-
-  // role (optional)
-  const groups = decoded["cognito:groups"];
-  const role =
-    (Array.isArray(groups) && groups.includes("admin") && "admin") ||
-    decoded["custom:role"] ||
-    "user";
+  // role from Cognito groups: "admins" / "students"
+  const groups = decoded["cognito:groups"] || [];
+  let role = "user";
+  if (Array.isArray(groups)) {
+    if (groups.includes("admins")) role = "admin";
+    else if (groups.includes("students")) role = "student";
+  }
+  localStorage.setItem("userRole", role);
 };
 
 const clearTokens = () => {
@@ -151,7 +146,7 @@ export const checkAuthStatus = () => {
         username:
           decoded.email ||
           decoded["cognito:username"] ||
-          localStorage.getItem("username"),
+          localStorage.getItem("username") || "",
         role: localStorage.getItem("userRole") || "user",
       },
     };

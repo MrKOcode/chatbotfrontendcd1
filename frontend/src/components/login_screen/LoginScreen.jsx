@@ -12,6 +12,8 @@ function LoginScreen({ onLoginSuccess }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loginError, setLoginError] = useState(null);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [confirmCode, setConfirmCode] = useState("");
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   // error handler
   const handleLoginError = (errorMessage) => {
@@ -19,12 +21,11 @@ function LoginScreen({ onLoginSuccess }) {
   };
 
   // success handler
-  const handleAuthSuccess = (userData) => {
-    // 存储用户信息到本地存储
-    localStorage.setItem('userId', userData.userId);
-    localStorage.setItem('username', userData.username);
-    localStorage.setItem('userRole', userData.role || 'user');
-    
+  const handleAuthSuccess = () => {
+  // With Cognito Option A:
+  // - loginUser() already saved idToken/accessToken/refreshToken in localStorage
+  // - confirmRegistration() just confirms email
+  // So here we only proceed to app
     onLoginSuccess();
   };
 
@@ -35,6 +36,8 @@ function LoginScreen({ onLoginSuccess }) {
     setUsername("");
     setPassword("");
     setConfirmPassword("");
+    setConfirmCode("");
+    setNeedsConfirmation(false);
   };
 
   return (
@@ -69,7 +72,7 @@ function LoginScreen({ onLoginSuccess }) {
           </div>
 
           {/* Confirm password field for registration */}
-          {isRegisterMode && (
+          {isRegisterMode && !needsConfirmation && (
             <div className={styles.inputGroup}>
               <input
                 className={styles.inputField}
@@ -79,6 +82,18 @@ function LoginScreen({ onLoginSuccess }) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
+          )}
+
+          {isRegisterMode && needsConfirmation && (
+          <div className={styles.inputGroup}>
+            <input
+              className={styles.inputField}
+              type="text"
+              placeholder="Verification code (from email)"
+              value={confirmCode}
+              onChange={(e) => setConfirmCode(e.target.value)}
+            />
+          </div>
           )}
 
           {/* Display error message */}
@@ -92,6 +107,9 @@ function LoginScreen({ onLoginSuccess }) {
               username={username}
               password={password}
               confirmPassword={confirmPassword}
+              confirmCode={confirmCode}
+              needsConfirmation={needsConfirmation}
+              setNeedsConfirmation={setNeedsConfirmation}
               onRegisterSuccess={handleAuthSuccess}
               onRegisterError={handleLoginError}
             />

@@ -10,7 +10,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { checkAuthStatus } from "./services/authService";
+import { checkAuthStatus, logoutUser } from "./services/authService";
 
 function App() {
   // user login state tracker
@@ -37,11 +37,9 @@ function App() {
 
   // logout handler
   const handleLogout = () => {
-    localStorage.removeItem('userId');
-    localStorage.removeItem('username');
-    localStorage.removeItem('userRole');
-    setIsLoggedIn(false);
-    setUserInfo(null);
+  logoutUser();
+  setIsLoggedIn(false);
+  setUserInfo(null);
   };
 
   // Show loading screen while checking auth status

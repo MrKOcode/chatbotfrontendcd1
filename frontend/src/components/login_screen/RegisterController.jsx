@@ -1,72 +1,65 @@
 import styles from "./LoginScreen.module.css";
 import React from "react";
-import { registerUser } from "../../services/authService";
+import { registerUser, confirmRegistration } from "../../services/authService";
 
-function RegisterController({ 
-  username, 
-  password, 
-  confirmPassword, 
-  onRegisterSuccess, 
-  onRegisterError 
+function RegisterController({
+  username,
+  password,
+  confirmPassword,
+  confirmCode,
+  needsConfirmation,
+  setNeedsConfirmation,
+  onRegisterSuccess,
+  onRegisterError,
 }) {
-  
   const handleRegister = async () => {
-    // 验证输入
     if (!username || !password || !confirmPassword) {
       onRegisterError("Please fill in all fields");
       return;
     }
-
-    if (username.length < 3) {
-      onRegisterError("User name must be at least 3 characters");
-      return;
-    }
-
-    if (password.length < 6) {
-      onRegisterError("Password must be at least 6 characters");
-      return;
-    }
-
     if (password !== confirmPassword) {
       onRegisterError("Passwords do not match");
       return;
     }
 
-    try {
-      const response = await registerUser(username, password);
-      
-      if (response.success) {
-        onRegisterSuccess({
-          userId: response.data.userId,
-          username: response.data.username,
-          role: response.data.role || 'user'
-        });
-      } else {
-        onRegisterError(response.error || "Registration failed" );
-      }
-    } catch (error) {
-  // Log entire error object and readable fields
-  console.error("Registration error:", error);
-  if (error && error.error) {
-    console.error("Cognito error message:", error.error);
-  }
-  if (error && error.message) {
-    console.error("Cognito error message:", error.message);
-  }
-  onRegisterError(error.error || error.message || "An error occurred during registration.");
-}
+    const res = await registerUser(username, password);
+    if (!res.success) {
+      onRegisterError(res.error || "Registration failed");
+      return;
+    }
+
+    setNeedsConfirmation(true);
+    onRegisterError("Check your email for the verification code.");
+  };
+
+  const handleConfirm = async () => {
+    if (!confirmCode) {
+      onRegisterError("Enter the verification code from your email.");
+      return;
+    }
+
+    const res = await confirmRegistration(username, confirmCode);
+    if (!res.success) {
+      onRegisterError(res.error || "Confirmation failed");
+      return;
+    }
+
+    onRegisterSuccess({ username });
   };
 
   return (
     <div className={styles.loginButtonContainer}>
-      <button 
-        className={styles.loginButton} 
-        onClick={handleRegister}
-      >
-        Enter
-      </button>
+      {!needsConfirmation ? (
+        <button className={styles.loginButton} onClick={handleRegister}>
+          Register
+        </button>
+      ) : (
+        <button className={styles.loginButton} onClick={handleConfirm}>
+          Confirm
+        </button>
+      )}
     </div>
   );
 }
 
-export default RegisterController; 
+export default RegisterController;

@@ -24,12 +24,27 @@ const saveTokens = (session) => {
   localStorage.setItem("idToken", idToken);
   localStorage.setItem("accessToken", accessToken);
   localStorage.setItem("refreshToken", refreshToken);
+  localStorage.setItem("userRole", role);
 
   const decoded = jwtDecode(idToken);
   localStorage.setItem(
     "username",
     decoded.email || decoded["cognito:username"] || ""
   );
+
+  localStorage.setItem("userId", decoded.sub || "");
+
+  const emailOrUsername =
+    decoded.email || decoded["cognito:username"] || "";
+
+
+
+  // role (optional)
+  const groups = decoded["cognito:groups"];
+  const role =
+    (Array.isArray(groups) && groups.includes("admin") && "admin") ||
+    decoded["custom:role"] ||
+    "user";
 };
 
 const clearTokens = () => {
@@ -37,6 +52,8 @@ const clearTokens = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("username");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userRole");
 };
 
 // ========================
@@ -130,10 +147,12 @@ export const checkAuthStatus = () => {
     return {
       isAuthenticated: true,
       user: {
+        userId: localStorage.getItem("userId") || decoded.sub,
         username:
           decoded.email ||
           decoded["cognito:username"] ||
           localStorage.getItem("username"),
+        role: localStorage.getItem("userRole") || "user",
       },
     };
   } catch {

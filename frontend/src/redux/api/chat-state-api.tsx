@@ -45,7 +45,7 @@ import {
 // ✅ Add this helper right after imports
 const getAuthHeaders = () => ({
   "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("idToken") || ""}`,
+  Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
 });
 
 const convertMessage = (message: BackendMessage): FrontendMessage => {
@@ -76,10 +76,10 @@ export const fetchConversationList = () => {
       );
       const userId = localStorage.getItem("userId");
       if (!userId) {
-  console.warn("User not logged in yet. Skipping API call.");
-  dispatch(fetchConListFailed()); // or a dedicated "not logged in" action
-  return;
-}
+      console.warn("User not logged in yet. Skipping API call.");
+      dispatch(fetchConListFailed()); // or a dedicated "not logged in" action
+      return;
+      }
 
       const response = await fetch(`${API_BASE}/api/AIchat/conversations?userId=${userId}`, {
         method: "GET",

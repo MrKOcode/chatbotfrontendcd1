@@ -4,7 +4,7 @@ import styles from "./ChatHistory.module.css";
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const getAuthHeaders = () => ({
   "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("idToken") || ""}`,
+  Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
 });
 
 
@@ -46,14 +46,14 @@ const ChatHistory = () => {
       
       if (data.total > 0) {
         setAdminChatSummary({
-          userId: parseInt(adminUserId),
+          userId: adminUserId,
           username: "Admin",
           messageCount: data.total,
           lastChatTime: data.messages && data.messages.length > 0 ? data.messages[0].createdAt : new Date().toISOString()
         });
       } else {
         setAdminChatSummary({
-          userId: parseInt(adminUserId),
+          userId: adminUserId,
           username: "Admin",
           messageCount: 0,
           lastChatTime: new Date().toISOString()
@@ -62,7 +62,7 @@ const ChatHistory = () => {
     } catch (error) {
       console.error("Error fetching admin chat summary:", error);
       setAdminChatSummary({
-        userId: parseInt(adminUserId),
+        userId: adminUserId,
         username: "Admin",
         messageCount: 0,
         lastChatTime: new Date().toISOString()

@@ -19,11 +19,7 @@ function LoginController({ username, password, onLoginSuccess, onLoginError }) {
       const res = await loginUser(username, password);
 
       if (res.success) {
-        onLoginSuccess({
-          userId: res.data.userId,
-          username: res.data.username,
-          role: res.data.role,
-        });
+        onLoginSuccess();
       } else {
         onLoginError(res.error || "Login failed");
       }

@@ -45,7 +45,7 @@ import {
 // ✅ Add this helper right after imports
 const getAuthHeaders = () => ({
   "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+  Authorization: `Bearer ${localStorage.getItem("idToken") || ""}`,
 });
 
 const convertMessage = (message: BackendMessage): FrontendMessage => {
@@ -81,7 +81,7 @@ export const fetchConversationList = () => {
       return;
       }
 
-      const response = await fetch(`${API_BASE}/api/AIchat/conversations?userId=${userId}`, {
+      const response = await fetch(`${API_BASE}/api/AIchat/conversations`, {
         method: "GET",
         headers: getAuthHeaders(),
       });

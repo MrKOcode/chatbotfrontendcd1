@@ -3,7 +3,16 @@ export interface Message {
   content: string;
   role: "send" | "ai";
   createdAt: string;
-  messageId?: string;
+  id: string;
+}
+
+export interface ApiMessage {
+  id: string;
+  conversationId: string;
+  userId: string;
+  role: "user" | "chatbot" | "system";
+  content: string;
+  createdAt: string;
 }
 
 export interface AssessmentData {
@@ -22,7 +31,7 @@ export interface Pagination {
 
 export interface Conversation {
   userId: string;
-  conversationId: string;
+  id: string;
   title: string;
   mode: string;
   createdAt: string;
@@ -38,7 +47,7 @@ export interface ConversationList {
 export interface ConversationContent {
   userId: string;
   conversationId: string;
-  content: Message[];
+  content: ApiMessage[];
   pagination: Pagination;
 }
 
@@ -61,8 +70,8 @@ export interface SendMessageRequest {
 export interface SendMessageResponse {
   userId: string;
   conversationId: string;
-  message: Message;
-  response: Message;
+  message: ApiMessage;
+  response: ApiMessage;
   conversation: Conversation;
 }
 

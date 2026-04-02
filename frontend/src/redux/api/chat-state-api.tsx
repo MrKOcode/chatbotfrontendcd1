@@ -19,6 +19,7 @@ import {
   deleteConSucceed,
   deleteConFailed,
   Message as FrontendMessage,
+  Message,
 } from "../store/chat-state";
 
 import {
@@ -28,19 +29,10 @@ import {
   SendMessageResponse,
   DeleteConversationResponse,
   Message as BackendMessage,
+  ApiMessage,
 } from "../backend_models/data-structures";
 
-// Utility function to convert backend Message to frontend Message **Delete for self-assessment development
-// const convertMessage = (message: BackendMessage): FrontendMessage => {
-//   console.log("convertMessage - Input:", message);
-//   const result = {
-//     msgId: message.messageId || "",
-//     role: message.role === "user" ? "send" : ("ai" as "send" | "ai"),
-//     msgContent: message.content,
-//   };
-//   console.log("convertMessage - Output:", result);
-//   return result;
-// };
+
 
 // ✅ Add this helper right after imports
 const getAuthHeaders = () => ({
@@ -48,15 +40,15 @@ const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("idToken") || ""}`,
 });
 
-const convertMessage = (message: BackendMessage): FrontendMessage => {
-  const roleMap: { [key: string]: FrontendMessage["role"] } = {
+const convertMessage = (message: ApiMessage): Message => {
+  const roleMap: Record<ApiMessage["role"], Message["role"]> = {
     user: "send",
     chatbot: "ai",
-    system: "ai", // or define a third "system" if needed
+    system: "ai",
   };
 
   return {
-    msgId: message.messageId || "",
+    msgId: message.id || "",
     role: roleMap[message.role],
     msgContent: message.content,
   };
@@ -98,7 +90,7 @@ export const fetchConversationList = () => {
       // Convert backend conversations to frontend format
       const rawData =data?.content?.data||[]
       const conversations = rawData.map((conversation) => ({
-        conId: conversation.conversationId,
+        conId: conversation.id,
         conTitle: conversation.title,
         messages: [], // Empty messages array as we need to fetch content separately
       }));

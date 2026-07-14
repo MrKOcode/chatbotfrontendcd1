@@ -1,18 +1,18 @@
-import SelfAssessment from "../self_assessment/SelfAssessment";
 import ChatComponent from "@/components/chat/chat-component.tsx";
 import ChatHistory from "./ChatHistory";
 import Sidebar, { SidebarItem } from "../sidebar/SidebarLogic";
 import styles from "./Dashboard.module.css";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changeCurrConId } from "@/redux/store/chat-state";
 import { fetchConversationList } from "@/redux/api/chat-state-api";
 import React from "react";
 // sidebar icons
-import { BotMessageSquare, NotebookPen, LogOut, User, History } from "lucide-react";
+import { BotMessageSquare, LogOut, User, History } from "lucide-react";
 
 //adding two missing imports to solve the userquestion and answers cannot appear in the chat UI, mainly because of the conversationID not properly set
 import { createConversation } from "@/redux/api/chat-state-api";
+import { fetchConversationContent } from "@/redux/api/chat-state-api";
 
 
 
@@ -20,25 +20,39 @@ function Dashboard({ userInfo, onLogout }) {
   const [activeComponent, setActiveComponent] = useState("Chat"); // Default to Assessment view
   const [selectedConId, setSelectedConId] = useState(null);
   const dispatch = useDispatch();
+  const initializedRef = useRef(false);
 
   const currentConId = useSelector((state) => state.chat.currentConId);
   const conList = useSelector((state) => state.chat.conversations);
 
-//Solved no conversation ID=no messages shown in chat window, chat-input has nowhere to send
+  const selectConversation = useCallback(
+    async (conversationId) => {
+      setSelectedConId(conversationId);
+      dispatch(changeCurrConId({ conversationId }));
+      await dispatch(fetchConversationContent(conversationId));
+    },
+    [dispatch],
+  );
+
+// Solved no conversation ID=no messages shown in chat window, chat-input has nowhere to send.
   useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
     const initializeChat = async () => {
-      await dispatch(fetchConversationList());
-  
-      // Only create a new conversation if none exist
-      const conCount = Object.keys(conList || {}).length;
-      if (conCount === 0) {
+      const conversations = await dispatch(fetchConversationList());
+
+      if (conversations.length === 0) {
         const newConId = await dispatch(createConversation());
-        dispatch(changeCurrConId({conversationId:newConId}));
-        setSelectedConId(newConId); // Also set local state to highlight sidebar item
+        dispatch(changeCurrConId({ conversationId: newConId }));
+        setSelectedConId(newConId);
+        return;
       }
+
+      await selectConversation(conversations[0].conId);
     };
-    initializeChat();
-  }, []);
+    void initializeChat();
+  }, [dispatch, selectConversation]);
   
 
 
@@ -87,14 +101,13 @@ function Dashboard({ userInfo, onLogout }) {
         <SidebarItem
           key={con.conId}
           text={con.conTitle}
-          active={selectedConId === currentConId}
+          active={selectedConId === con.conId}
           onClick={() => {
-            console.log("Conversation selected:", con.conId);
-            setSelectedConId(con.conId);
+            void selectConversation(con.conId);
           }}
         />
       ));
-  }, [conList, selectedConId, currentConId]);
+  }, [conList, selectedConId, selectConversation]);
 
   return (
     <div className={styles.dashContainer}>

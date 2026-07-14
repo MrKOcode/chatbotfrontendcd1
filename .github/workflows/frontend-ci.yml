@@ -1,0 +1,58 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - aichatbotbranch2
+      - main
+  pull_request:
+    branches:
+      - aichatbotbranch2
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Type-check, lint, test, and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Lint blocking errors
+        run: npm run lint -- --quiet
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build production bundle
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: https://example.execute-api.us-west-2.amazonaws.com/Prod
+          VITE_COGNITO_USER_POOL_ID: us-west-2_example
+          VITE_COGNITO_CLIENT_ID: ci-placeholder
+          VITE_COGNITO_DOMAIN: https://example.auth.us-west-2.amazoncognito.com
+          VITE_COGNITO_REGION: us-west-2

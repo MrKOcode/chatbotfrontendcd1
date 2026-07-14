@@ -85,7 +85,7 @@ export const confirmRegistration = (email, code) => {
       Pool: userPool,
     });
 
-    user.confirmRegistration(code, true, (err, result) => {
+    user.confirmRegistration(code, true, (err) => {
       if (err) {
         resolve({ success: false, error: err.message });
         return;

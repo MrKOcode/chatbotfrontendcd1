@@ -1,4 +1,10 @@
-(window as any).global = window;
+declare global {
+  interface Window {
+    global: Window & typeof globalThis;
+  }
+}
+
+window.global = window;
 
 import React from "react";
 import ReactDOM from "react-dom/client";

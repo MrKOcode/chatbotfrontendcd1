@@ -1,4 +1,4 @@
-import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
+import { ChevronFirst, ChevronLast } from "lucide-react";
 import { createContext, useContext, useState } from "react";
 import React from "react";
 // sidebar context

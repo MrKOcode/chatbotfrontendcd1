@@ -12,6 +12,8 @@ const poolData = {
 
 const userPool = new CognitoUserPool(poolData);
 
+const normalizeEmail = (email) => email.trim().toLowerCase();
+
 // ========================
 // Token Helpers
 // ========================
@@ -57,7 +59,7 @@ const clearTokens = () => {
 
 export const registerUser = (email, password) => {
   return new Promise((resolve) => {
-    userPool.signUp(email, password, [], null, (err, result) => {
+    userPool.signUp(normalizeEmail(email), password, [], null, (err, result) => {
       if (err) {
         resolve({ success: false, error: err.message });
         return;
@@ -81,11 +83,29 @@ export const registerUser = (email, password) => {
 export const confirmRegistration = (email, code) => {
   return new Promise((resolve) => {
     const user = new CognitoUser({
-      Username: email,
+      Username: normalizeEmail(email),
       Pool: userPool,
     });
 
     user.confirmRegistration(code, true, (err) => {
+      if (err) {
+        resolve({ success: false, error: err.message });
+        return;
+      }
+
+      resolve({ success: true });
+    });
+  });
+};
+
+export const resendConfirmationCode = (email) => {
+  return new Promise((resolve) => {
+    const user = new CognitoUser({
+      Username: normalizeEmail(email),
+      Pool: userPool,
+    });
+
+    user.resendConfirmationCode((err) => {
       if (err) {
         resolve({ success: false, error: err.message });
         return;
@@ -103,12 +123,12 @@ export const confirmRegistration = (email, code) => {
 export const loginUser = (email, password) => {
   return new Promise((resolve) => {
     const authDetails = new AuthenticationDetails({
-      Username: email,
+      Username: normalizeEmail(email),
       Password: password,
     });
 
     const user = new CognitoUser({
-      Username: email,
+      Username: normalizeEmail(email),
       Pool: userPool,
     });
 

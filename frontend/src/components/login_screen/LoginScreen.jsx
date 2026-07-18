@@ -10,14 +10,27 @@ function LoginScreen({ onLoginSuccess }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loginError, setLoginError] = useState(null);
+  const [authMessage, setAuthMessage] = useState(null);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [confirmCode, setConfirmCode] = useState("");
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   // error handler
   const handleLoginError = (errorMessage) => {
-    setLoginError(errorMessage);
+    setAuthMessage({ type: "error", text: errorMessage });
+  };
+
+  const handleRegisterMessage = (message) => {
+    setAuthMessage({ type: "success", text: message });
+  };
+
+  const handleRegistrationComplete = (message) => {
+    setIsRegisterMode(false);
+    setPassword("");
+    setConfirmPassword("");
+    setConfirmCode("");
+    setNeedsConfirmation(false);
+    handleRegisterMessage(message);
   };
 
   // success handler
@@ -32,7 +45,7 @@ function LoginScreen({ onLoginSuccess }) {
   // 切换模式
   const toggleMode = () => {
     setIsRegisterMode(!isRegisterMode);
-    setLoginError(null);
+    setAuthMessage(null);
     setUsername("");
     setPassword("");
     setConfirmPassword("");
@@ -98,7 +111,11 @@ function LoginScreen({ onLoginSuccess }) {
 
           {/* Display error message */}
           <div className={styles.failedLogin}>
-            {loginError && <p className={styles.errorMessage}>{loginError}</p>}
+            {authMessage && (
+              <p className={authMessage.type === "error" ? styles.errorMessage : styles.successMessage}>
+                {authMessage.text}
+              </p>
+            )}
           </div>
 
           {/* Render appropriate controller based on mode */}
@@ -110,8 +127,9 @@ function LoginScreen({ onLoginSuccess }) {
               confirmCode={confirmCode}
               needsConfirmation={needsConfirmation}
               setNeedsConfirmation={setNeedsConfirmation}
-              onRegisterSuccess={handleAuthSuccess}
+              onRegistrationComplete={handleRegistrationComplete}
               onRegisterError={handleLoginError}
+              onRegisterMessage={handleRegisterMessage}
             />
           ) : (
             <LoginController

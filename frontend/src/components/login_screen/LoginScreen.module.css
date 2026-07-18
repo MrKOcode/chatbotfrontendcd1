@@ -145,6 +145,15 @@
     margin-top: -20px;
 }
 
+.errorMessage,
+.successMessage {
+    margin: 0;
+}
+
+.successMessage {
+    color: #176b2c;
+}
+
 /* Toggle between login and register styles */
 .toggleContainer {
     display: flex;
@@ -182,6 +191,8 @@
     align-items: center;
     width: 100%;
     margin-top: 10px;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .loginButton {
@@ -221,6 +232,15 @@
 
 .loginButton.loading {
     background-color: var(--button-bg-hover);
+}
+
+.secondaryButton {
+    background: transparent;
+    border: none;
+    color: var(--welcome-panel-bg);
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: underline;
 }
 
 /* Loading spinner styles */

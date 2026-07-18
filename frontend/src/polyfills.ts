@@ -1,4 +1,11 @@
 import { Buffer } from "buffer";
 
-(globalThis as any).Buffer = Buffer;
-(globalThis as any).process = (globalThis as any).process || { env: {} };
+globalThis.Buffer = Buffer;
+
+if (typeof globalThis.process === "undefined") {
+  Object.defineProperty(globalThis, "process", {
+    configurable: true,
+    value: { env: {} },
+    writable: true,
+  });
+}

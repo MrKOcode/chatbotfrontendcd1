@@ -1,0 +1,117 @@
+name: Deploy Frontend to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: frontend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy production
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+      VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+      VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
+      VITE_COGNITO_DOMAIN: ${{ vars.VITE_COGNITO_DOMAIN }}
+      VITE_COGNITO_REGION: ${{ vars.VITE_COGNITO_REGION }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          required=(
+            AWS_REGION
+            AWS_ROLE_ARN
+            S3_BUCKET_NAME
+            CLOUDFRONT_DISTRIBUTION_ID
+            VITE_API_BASE_URL
+            VITE_COGNITO_USER_POOL_ID
+            VITE_COGNITO_CLIENT_ID
+            VITE_COGNITO_DOMAIN
+            VITE_COGNITO_REGION
+          )
+          for variable in "${required[@]}"; do
+            if [ -z "${!variable}" ]; then
+              echo "Missing required production variable: ${variable}"
+              exit 1
+            fi
+          done
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Lint blocking errors
+        run: npm run lint -- --quiet
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Configure short-lived AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: frontend-${{ github.run_id }}
+
+      - name: Upload versioned assets
+        run: >-
+          aws s3 sync dist "s3://${S3_BUCKET_NAME}"
+          --delete
+          --exclude "index.html"
+          --cache-control "public,max-age=31536000,immutable"
+
+      - name: Upload non-cached application entry point
+        run: >-
+          aws s3 cp dist/index.html "s3://${S3_BUCKET_NAME}/index.html"
+          --content-type "text/html; charset=utf-8"
+          --cache-control "no-cache,no-store,must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        run: >-
+          aws cloudfront create-invalidation
+          --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}"
+          --paths "/*"
+
+      - name: Publish deployment summary
+        working-directory: .
+        shell: bash
+        run: |
+          echo "### Frontend production deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- S3 bucket: \`${S3_BUCKET_NAME}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- CloudFront distribution: \`${CLOUDFRONT_DISTRIBUTION_ID}\`" >> "$GITHUB_STEP_SUMMARY"

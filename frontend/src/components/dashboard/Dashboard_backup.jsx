@@ -1,6 +1,5 @@
 import SelfAssessment from "../self_assessment/SelfAssessment";
 import ChatComponent from "@/components/chat/chat-component.tsx";
-import ChatHistory from "./ChatHistory";
 import Sidebar, { SidebarItem } from "../sidebar/SidebarLogic";
 import styles from "./Dashboard.module.css";
 import { useEffect, useMemo, useState } from "react";
@@ -9,7 +8,7 @@ import { changeCurrConId } from "@/redux/store/chat-state";
 import { fetchConversationList } from "@/redux/api/chat-state-api";
 import React from "react";
 // sidebar icons
-import { BotMessageSquare, NotebookPen, LogOut, User, History } from "lucide-react";
+import { BotMessageSquare, NotebookPen, LogOut, User } from "lucide-react";
 
 //adding two missing imports to solve the userquestion and answers cannot appear in the chat UI, mainly because of the conversationID not properly set
 import { createConversation } from "@/redux/api/chat-state-api";

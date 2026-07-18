@@ -1,0 +1,6 @@
+# Local project Codex configuration.
+#
+# Intentionally minimal: durable repository instructions live in ../AGENTS.md.
+# Add project-specific Codex settings only after discussing their security and
+# workflow impact. This file is excluded locally and is not intended for GitHub.
+

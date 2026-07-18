@@ -1,6 +1,10 @@
 import styles from "./LoginScreen.module.css";
 import React from "react";
-import { registerUser, confirmRegistration } from "../../services/authService";
+import {
+  registerUser,
+  confirmRegistration,
+  resendConfirmationCode,
+} from "../../services/authService";
 
 function RegisterController({
   username,
@@ -9,8 +13,9 @@ function RegisterController({
   confirmCode,
   needsConfirmation,
   setNeedsConfirmation,
-  onRegisterSuccess,
+  onRegistrationComplete,
   onRegisterError,
+  onRegisterMessage,
 }) {
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
@@ -28,8 +33,13 @@ function RegisterController({
       return;
     }
 
+    if (res.data.userConfirmed) {
+      onRegistrationComplete("Registration complete. You can now log in.");
+      return;
+    }
+
     setNeedsConfirmation(true);
-    onRegisterError("Check your email for the verification code.");
+    onRegisterMessage("Check your email for the verification code.");
   };
 
   const handleConfirm = async () => {
@@ -44,7 +54,17 @@ function RegisterController({
       return;
     }
 
-    onRegisterSuccess({ username });
+    onRegistrationComplete("Email confirmed. You can now log in.");
+  };
+
+  const handleResend = async () => {
+    const res = await resendConfirmationCode(username);
+    if (!res.success) {
+      onRegisterError(res.error || "Unable to resend the verification code.");
+      return;
+    }
+
+    onRegisterMessage("A new verification code has been sent.");
   };
 
   return (
@@ -54,9 +74,14 @@ function RegisterController({
           Register
         </button>
       ) : (
-        <button className={styles.loginButton} onClick={handleConfirm}>
-          Confirm
-        </button>
+        <>
+          <button className={styles.loginButton} onClick={handleConfirm}>
+            Confirm
+          </button>
+          <button className={styles.secondaryButton} onClick={handleResend}>
+            Resend code
+          </button>
+        </>
       )}
     </div>
   );

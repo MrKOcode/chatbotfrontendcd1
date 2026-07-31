@@ -23,5 +23,4 @@ dist-ssr
 compare.go
 frontend/src/components/dashboard/ChatHistory.jsx
 frontend/src/components/dashboard/ChatHistory.module.css
-frontend/test
 

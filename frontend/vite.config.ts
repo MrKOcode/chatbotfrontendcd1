@@ -28,7 +28,16 @@ export default defineConfig(({ mode }) => {
       include: ["./test/**/*.{test,spec}.{ts,tsx}"],
       coverage: {
         reporter: ["text", "json", "html"],
-        exclude: ["node_modules/", "test/"],
+        include: [
+          "src/lib/**/*.{ts,tsx}",
+          "src/services/**/*.{ts,tsx,js,jsx}",
+          "src/redux/api/**/*.{ts,tsx}",
+          "src/redux/store/chat-state.tsx",
+        ],
+        exclude: ["node_modules/", "test/", "src/redux/backend_models/**"],
+        thresholds: {
+          functions: 75,
+        },
       },
     },
 

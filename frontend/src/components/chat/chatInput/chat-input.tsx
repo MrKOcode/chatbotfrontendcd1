@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { AutosizeTextarea } from "@/components/chat/ui/autosize-textarea";
 import { Button } from "@/components/chat/ui/button";
+import { Send } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { sendMessage } from "@/redux/api/chat-state-api";
 import type { AppDispatch, RootState } from "@/redux/store/store";
@@ -44,21 +45,24 @@ export default function ChatInput() {
   };
 
   return (
-    <div className="absolute w-full bottom-0 flex justify-end items-end select-none pointer-events-none">
-      <div className="h-28 w-full items-center justify-center flex flex-col z-10">
-        <div className="w-2/3 items-center justify-center flex">
-          <div className="flex-row flex space-x-4 items-end w-full pointer-events-auto">
+    <div className="campus-composer-dock">
+      <div className="campus-composer-wrap">
+          <div className="campus-composer">
             <AutosizeTextarea
-              className="h-96 w-full"
-              placeholder="Please type here..."
+              className="campus-composer-input"
+              placeholder="Ask anything over a cup of coffee..."
               ref={inputRef}
+              minHeight={48}
+              maxHeight={160}
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyPress}
             />
-            <Button onClick={submitMessage}>Send</Button>
+            <Button onClick={submitMessage} className="campus-send-button" aria-label="Send message">
+              <Send size={17} /> <span>Send</span>
+            </Button>
           </div>
-        </div>
+          <p className="campus-composer-note">Enter to send · Shift + Enter for a new line</p>
       </div>
     </div>
   );

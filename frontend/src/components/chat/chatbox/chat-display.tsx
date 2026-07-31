@@ -64,10 +64,10 @@ console.log("Current conversation ID:", conversationId)
   }, [displayConverationContent]);
 
   return (
-    <div className="h-screen w-full ">
-      <ChatMessageList ref={chatContainerRef}>
+    <div className="campus-message-region">
+      <ChatMessageList ref={chatContainerRef} className="campus-message-list">
         {displayConverationContent}
-        <div className="min-h-screen" />
+        <div ref={endOfMessagesRef} className="h-1 shrink-0" />
       </ChatMessageList>
     </div>
   );

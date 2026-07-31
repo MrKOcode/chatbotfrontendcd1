@@ -11,7 +11,7 @@ import { Button, ButtonProps } from "@/components/chat/ui/button";
 
 // ChatBubble
 const chatBubbleVariant = cva(
-  "flex gap-2 max-w-prose items-end relative group ",
+  "flex gap-2 items-end relative group campus-chat-bubble",
   {
     variants: {
       variant: {
@@ -76,7 +76,7 @@ const ChatBubbleAvatar: React.FC<ChatBubbleAvatarProps> = ({
 );
 
 // ChatBubbleMessage
-const chatBubbleMessageVariants = cva("p-4 ", {
+const chatBubbleMessageVariants = cva("p-4 campus-chat-message", {
   variants: {
     variant: {
       received:

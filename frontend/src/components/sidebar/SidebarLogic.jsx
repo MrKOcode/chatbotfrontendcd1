@@ -1,4 +1,4 @@
-import { ChevronFirst, ChevronLast } from "lucide-react";
+import { ChevronFirst, ChevronLast, Coffee } from "lucide-react";
 import { createContext, useContext, useState } from "react";
 import React from "react";
 // sidebar context
@@ -9,26 +9,21 @@ export default function SidebarLogic({ children }) {
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <aside className="h-screen">
-      <nav className="h-full flex flex-col bg-white border-r shadow-sm">
-        <div className="p-4 pb-2 flex justify-between items-center">
-          <img
-            src="https://i.ibb.co/bMm0tJ5j/website-icon.png"
-            alt="website-icon"
-            className={`overflow-hidden transition-all ${
-              expanded ? "w-8" : "w-0"
-            }`}
-          />
+    <aside className={`campus-sidebar ${expanded ? "is-expanded" : "is-collapsed"}`}>
+      <nav className="campus-sidebar-nav">
+        <div className="campus-sidebar-controls">
+          {!expanded && <Coffee size={22} aria-label="Campus Café" />}
           <button
             onClick={() => setExpanded((curr) => !curr)}
-            className="p-1.5 rounded-lg bg-gray-50 hover:bg-green-300"
+            className="campus-collapse-button"
+            aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
           >
             {expanded ? <ChevronFirst /> : <ChevronLast />}
           </button>
         </div>
 
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 px-3">{children}</ul>
+          <ul className="campus-sidebar-content">{children}</ul>
         </SidebarContext.Provider>
       </nav>
     </aside>
@@ -36,27 +31,16 @@ export default function SidebarLogic({ children }) {
 }
 
 // logic for the sidebar items themselves
-export function SidebarItem({ icon, text, active, alert, onClick }) {
+export function SidebarItem({ icon, text, active, alert, onClick, className = "" }) {
   const { expanded } = useContext(SidebarContext);
   return (
     <li
       onClick={onClick}
-      className={`
-            relative flex items-center py-2 px-3 
-            my-1 font-medium rounded-md cursor-pointer
-            transition-colors group
-            ${
-              active
-                ? "bg-gradient-to-tr from-purple-300 to bg-purple-100 text-black"
-                : "hover:bg-purple-100 text-black"
-            }    
-        `}
+      className={`campus-sidebar-item group ${active ? "is-active" : ""} ${className}`}
     >
       {icon}
       <span
-        className={`overflow-hidden transition-all ${
-          expanded ? "w-52 ml-3" : "w-0"
-        }`}
+        className={`campus-sidebar-text ${expanded ? "is-visible" : ""}`}
       >
         {text}
       </span>
@@ -73,7 +57,7 @@ export function SidebarItem({ icon, text, active, alert, onClick }) {
         <div
           className={`
                 absolute left-full rounded-md px-2 py-1 ml-6
-                bg-purple-300 text-black text-sm
+                bg-[#37553b] text-[#fffdf7] text-sm
                 invisible opacity-20 -translate-x-3 transition-all
                 group-hover:visible group-hover:opacity-100 group-hover:translate-x-0
             `}

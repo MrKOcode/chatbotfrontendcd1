@@ -8,7 +8,7 @@ import { changeCurrConId } from "@/redux/store/chat-state";
 import { fetchConversationList } from "@/redux/api/chat-state-api";
 import React from "react";
 // sidebar icons
-import { BotMessageSquare, LogOut, User, History } from "lucide-react";
+import { BotMessageSquare, LogOut, User, History, Coffee } from "lucide-react";
 
 //adding two missing imports to solve the userquestion and answers cannot appear in the chat UI, mainly because of the conversationID not properly set
 import { createConversation } from "@/redux/api/chat-state-api";
@@ -112,6 +112,13 @@ function Dashboard({ userInfo, onLogout }) {
   return (
     <div className={styles.dashContainer}>
       <Sidebar >
+        <div className={styles.brandBlock}>
+          <div className={styles.brandIcon}><Coffee size={20} /></div>
+          <div>
+            <div className={styles.brandName}>Campus Café</div>
+            <div className={styles.brandTagline}>A thoughtful place to chat</div>
+          </div>
+        </div>
         {/* User info section */}
         <div className={styles.userSection}>
           <div className={styles.userInfo}>
@@ -127,6 +134,7 @@ function Dashboard({ userInfo, onLogout }) {
 
         {/* sidebar item is for the different pages we have for now 2 */}
         {/* each item can take an icon, text, active(user clicked on), and an alert */}
+        <div className={styles.sectionLabel}>Workspace</div>
         <SidebarItem
           icon={<BotMessageSquare size={20} />}
           text="Chat"
@@ -134,7 +142,8 @@ function Dashboard({ userInfo, onLogout }) {
           onClick={() => setActiveComponent("Chat")}
         />
 
-        {mapConversations}
+        <div className={styles.sectionLabel}>Recent conversations</div>
+        <div className={styles.conversationList}>{mapConversations}</div>
 
         <SidebarItem
           icon={<History size={20} />}

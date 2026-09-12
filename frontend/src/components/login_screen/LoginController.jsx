@@ -43,7 +43,9 @@ function LoginController({ username, password, onLoginSuccess, onLoginError }) {
       className={`${styles.loginButton} ${animateButton ? styles.clicked : ""} ${isLoading ? styles.loading : ""}`}
       onClick={handleClick}
       disabled={isLoading}
+      aria-busy={isLoading}
     >
+      <span>{isLoading ? "Signing in…" : "Sign in"}</span>
       {isLoading ? <div className={styles.spinner}></div> : <FaArrowRightLong className={styles.rightArrow} />}
     </button>
   );

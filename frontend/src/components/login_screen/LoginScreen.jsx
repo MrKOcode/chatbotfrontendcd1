@@ -1,5 +1,5 @@
 import styles from "./LoginScreen.module.css";
-import logo from "../assets/website-icon.png";
+import logo from "../assets/wargreymon-crystal.png";
 import { useState } from "react";
 import LoginController from "./LoginController";
 import RegisterController from "./RegisterController";
@@ -68,6 +68,8 @@ function LoginScreen({ onLoginSuccess }) {
               className={styles.inputField}
               type="text"
               placeholder="username"
+              aria-label="Username"
+              autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -79,6 +81,8 @@ function LoginScreen({ onLoginSuccess }) {
               className={styles.inputField}
               type="password"
               placeholder="password"
+              aria-label="Password"
+              autoComplete={isRegisterMode ? "new-password" : "current-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -91,6 +95,8 @@ function LoginScreen({ onLoginSuccess }) {
                 className={styles.inputField}
                 type="password"
                 placeholder="confirm password"
+                aria-label="Confirm password"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -103,6 +109,8 @@ function LoginScreen({ onLoginSuccess }) {
               className={styles.inputField}
               type="text"
               placeholder="Verification code (from email)"
+              aria-label="Verification code"
+              autoComplete="one-time-code"
               value={confirmCode}
               onChange={(e) => setConfirmCode(e.target.value)}
             />
@@ -143,10 +151,10 @@ function LoginScreen({ onLoginSuccess }) {
           {/* Toggle between login and register */}
           <div className={styles.toggleContainer}>
             <p className={styles.toggleText}>
-              {isRegisterMode 
-                ? "Already have an account?" 
+              {isRegisterMode
+                ? "Already have an account?"
                 : "Don't have an account?"}
-              <button 
+              <button
                 className={styles.toggleButton}
                 onClick={toggleMode}
               >
@@ -157,10 +165,10 @@ function LoginScreen({ onLoginSuccess }) {
         </div>
 
         <div className={styles.welcomePanel}>
-          <img src={logo} />
+          <img src={logo} alt="WarGreymon with a crystal finish" width="1254" height="1254" />
           <h1 className={styles.welcomeHeader}>Welcome欢迎！</h1>
           <p className={styles.subtext}>
-            {isRegisterMode 
+            {isRegisterMode
               ? "Create an account to get started!"
               : "Please enter your credentials to log in."}
           </p>

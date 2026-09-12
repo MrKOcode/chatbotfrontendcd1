@@ -35,9 +35,9 @@ export function SidebarItem({ icon, text, active, alert, onClick, className = ""
   const { expanded } = useContext(SidebarContext);
   return (
     <li
-      onClick={onClick}
       className={`campus-sidebar-item group ${active ? "is-active" : ""} ${className}`}
     >
+      <button type="button" onClick={onClick} aria-label={text} aria-current={active ? "page" : undefined}>
       {icon}
       <span
         className={`campus-sidebar-text ${expanded ? "is-visible" : ""}`}
@@ -52,12 +52,13 @@ export function SidebarItem({ icon, text, active, alert, onClick, className = ""
                 `}
         />
       )}
+      </button>
 
       {!expanded && (
         <div
           className={`
                 absolute left-full rounded-md px-2 py-1 ml-6
-                bg-[#37553b] text-[#fffdf7] text-sm
+                campus-sidebar-tooltip text-sm
                 invisible opacity-20 -translate-x-3 transition-all
                 group-hover:visible group-hover:opacity-100 group-hover:translate-x-0
             `}

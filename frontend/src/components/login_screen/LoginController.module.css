@@ -1,45 +1,26 @@
-.loginButton{
-    border: 2px solid black;
-    border-radius: 6px;
-
-    background-color: var(--button-bg);
-    
-    /* fixes arrow being stuck to the left */
-    justify-items: center;
-    
-    /* button size */
-    width: 40%;
-    height: 10%;
-
-    /* button border removal */
-    outline: none;
-    border: none;
-    /* margin-top: 10px; */
-    margin-left: 30%;
-    transition: all 0.15s;
+.loginButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 24px;
+  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  color: var(--primary-foreground);
+  background: var(--gold-gradient);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 #fff9, 0 4px 12px #283e5010;
+  transition: box-shadow 160ms ease;
 }
-/* button clicked animation */
-.clicked{
-    animation: buttonClick 0.15s ease-in-out;
-}
-@keyframes buttonClick {
-    0%{
-        transform: scale(1);
-    }
-    50%{
-        transform: scale(0.98);
-    }
-    100%{
-        transform: scale(1);
-    }
-}
-.loginButton:hover{
-    background-color: var(--button-bg-hover);
-    box-shadow: 0 0 8px rgba(0, 0, 0, .5);
-    outline: 2px solid rgb(120, 24, 137);
-}
-
-.rightArrow{
-    vertical-align: bottom;
-    transform: scale(1.5);
-}
+.loginButton:hover:not(:disabled) { box-shadow: inset 0 1px 0 #fff9, 0 6px 18px #283e5020; }
+.clicked { box-shadow: inset 0 2px 4px #59400c20; }
+.loginButton:disabled { opacity: .55; cursor: not-allowed; }
+.loading { cursor: wait; }
+.rightArrow { font-size: 18px; }
+.spinner { width: 18px; height: 18px; border: 2px solid #59400c33; border-top-color: var(--primary-foreground); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }

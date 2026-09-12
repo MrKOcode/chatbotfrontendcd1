@@ -1,9 +1,10 @@
 .dashContainer {
+    position: relative;
     height: 100dvh;
     width: 100%;
     display: flex;
     overflow: hidden;
-    background: #f7f1e7;
+    background: var(--background);
 }
 
 
@@ -14,10 +15,10 @@
 /* User info section styles */
 .userSection {
     padding: 12px;
-    border: 1px solid rgba(55, 85, 59, 0.14);
+    border: 1px solid var(--border);
     border-radius: 14px;
     margin: 8px 12px 18px;
-    background: rgba(255, 253, 247, 0.72);
+    background: var(--card);
 }
 
 .userInfo {
@@ -30,12 +31,12 @@
 .username {
     font-weight: 600;
     font-size: 14px;
-    color: #253c2b;
+    color: var(--foreground);
 }
 
 .userRole {
     font-size: 12px;
-    color: #7b7468;
+    color: var(--muted-foreground);
     text-transform: capitalize;
     margin-left: 24px;
 }
@@ -44,7 +45,7 @@
 .logoutSection {
     margin-top: auto;
     padding-top: 12px;
-    border-top: 1px solid rgba(55, 85, 59, 0.14);
+    border-top: 1px solid var(--border);
 }
 
 .logoutButton {
@@ -62,7 +63,7 @@
     gap: 11px;
     margin: 8px 12px 12px;
     padding: 10px 4px;
-    color: #253c2b;
+    color: var(--foreground);
 }
 
 .brandIcon {
@@ -71,13 +72,13 @@
     height: 38px;
     place-items: center;
     border-radius: 12px;
-    color: #fffdf7;
-    background: #37553b;
-    box-shadow: 0 6px 16px rgba(55, 85, 59, 0.2);
+    color: var(--primary-foreground);
+    background: var(--primary);
+    box-shadow: 0 6px 16px rgba(49, 116, 158, 0.12);
 }
 
 .brandName {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-family);
     font-size: 17px;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -85,13 +86,13 @@
 
 .brandTagline {
     margin-top: 1px;
-    color: #82796d;
+    color: var(--muted-foreground);
     font-size: 10px;
 }
 
 .sectionLabel {
     margin: 14px 15px 5px;
-    color: #93897b;
+    color: var(--muted-foreground);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.11em;

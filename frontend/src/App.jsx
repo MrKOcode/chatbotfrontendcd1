@@ -1,5 +1,6 @@
 import "./App.css";
 import React from "react";
+import { useButtonReflection } from "./hooks/useButtonReflection";
 import LoginScreen from "./components/login_screen/LoginScreen";
 import Dashboard from "./components/dashboard/Dashboard";
 
@@ -13,6 +14,7 @@ import {
 import { checkAuthStatus, logoutUser } from "./services/authService";
 
 function App() {
+  useButtonReflection();
   // user login state tracker
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
